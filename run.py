@@ -1,6 +1,6 @@
 import os
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # 基础URL
 base_url = "https://image-org-s.akiba-souken.com/assets/images/article/"
@@ -25,7 +25,7 @@ def download_and_save_image(image_number):
     if response.status_code == 200:
         # 获取当前时间并格式化
         current_time = datetime.utcnow()
-        current_time += datetime.timedelta(hours=8)  # UTC+8
+        current_time += timedelta(hours=8)  # UTC+8
         formatted_date = current_time.strftime("%Y-%m-%d")
         formatted_time = current_time.strftime("%H.%M")
 
