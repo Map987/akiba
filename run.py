@@ -19,25 +19,35 @@ end_number = start_number + 100
 # 用于下载和保存图片的函数
 def download_and_save_image(image_number):
     section = str(image_number)[1:4]
-    image_url = f"{base_url}001/{section}/{image_number}.jpg"
-    response = requests.get(image_url)
+    # 尝试下载.jpg文件
+    image_url_jpg = f"{base_url}001/{section}/{image_number}.jpg"
+    response_jpg = requests.get(image_url_jpg)
 
-    if response.status_code == 200:
-        # 获取当前时间并格式化
-        current_time = datetime.utcnow()
-        current_time += timedelta(hours=8)  # UTC+8
-        formatted_date = current_time.strftime("%Y-%m-%d")
-        formatted_time = current_time.strftime("%H.%M")
-
-        # 新的文件名
-        new_filename = f"{image_number}.{formatted_date}..{formatted_time}.jpg"
-        with open(new_filename, 'wb') as f:
-            f.write(response.content)
-        print(f"Downloaded and saved: {new_filename}")
-        return image_number
+    if response_jpg.status_code == 200:
+        image_url = image_url_jpg
     else:
-        print(f"Image {image_number}.jpg not found, skipping.")
-        return None
+        # 如果.jpg文件不存在，尝试下载.png文件
+        image_url_png = f"{base_url}001/{section}/{image_number}.png"
+        response_png = requests.get(image_url_png)
+        if response_png.status_code == 200:
+            image_url = image_url_png
+        else:
+            print(f"Image {image_number}.jpg/png not found, skipping.")
+            return None
+
+    # 获取当前时间并格式化
+    current_time = datetime.utcnow()
+    current_time += timedelta(hours=8)  # UTC+8
+    formatted_date = current_time.strftime("%Y-%m-%d")
+    formatted_time = current_time.strftime("%H.%M")
+
+    # 新的文件名，根据后缀名确定
+    file_extension = image_url.split('.')[-1]
+    new_filename = f"{image_number}.{formatted_date}..{formatted_time}.{file_extension}"
+    with open(new_filename, 'wb') as f:
+        f.write(requests.get(image_url).content)
+    print(f"Downloaded and saved: {new_filename}")
+    return image_number
 
 # 遍历图片编号并下载
 last_valid_number = start_number
